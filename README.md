@@ -2,10 +2,16 @@
 
 This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives that annotate an SDL. These annotations are useful for [Schema Stitching](https://www.graphql-tools.com/docs/stitch-directives-sdl), [Apollo Federation](https://www.apollographql.com/docs/federation/), and other proprietary uses.
 
-This gem is intentionally generic, unlike the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem upon which it is based. The goals of this gem are very simple:
+This gem is intentionally generic, versus the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem upon which it is based. The goals of this gem are much simpler:
 
-1. allow schema directives to be applied to any GraphQL element, and then printed into an annotated SDL. See [Class-based schemas](#class-based-schemas).
-2. allow class-based schemas and `from_definition` schemas to be combined and printed together. See [Schemas from definition](#schemas-from-definition).
+1. allow schema directives to be applied to any GraphQL element, and then printed into an annotated SDL.
+2. allow class-based schemas and parsed `GraphQL::Schema.from_definition` schemas to be combined and printed together.
+
+## Table of Contents
+
+- [Class-based schemas](#class-based-schemas)
+- [Schemas from definition](#schemas-from-definition)
+- [Schema Stitching SDL](#schema-stitching-sdl)
 
 ## Installation
 
@@ -25,7 +31,7 @@ bundle install
 
 There's a typed mixin available for extending all GraphQL schema members.
 
-### Schemas
+### Schema classes
 
 Include the schema mixin:
 
@@ -41,7 +47,7 @@ This adds a `print_schema_with_directives` method to print an SDL that includes 
 MySchema.print_schema_with_directives
 ```
 
-### Fields, Objects &amp; Interfaces
+### Field, Object &amp; Interface classes
 
 Setup base abstracts:
 
@@ -99,7 +105,7 @@ type XWing @attribute(speed: "fast") @rebel {
 }
 ```
 
-### Arguments &amp; InputObjects
+### Argument &amp; InputObject classes
 
 Base abstracts:
 
@@ -134,7 +140,7 @@ input FormInput @oneField {
 }
 ```
 
-### Enums &amp; values
+### EnumValue &amp; Enum classes
 
 Base abstracts:
 
@@ -168,7 +174,7 @@ enum FormOption @dunno {
 }
 ```
 
-### Other types
+### Other classes
 
 Base abstracts:
 

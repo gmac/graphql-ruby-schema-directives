@@ -9,6 +9,7 @@ This gem is intentionally generic, versus the [apollo-federation](https://github
 
 ## Table of Contents
 
+- [Installation](#installation)
 - [Class-based schemas](#class-based-schemas)
 - [Schemas from definition](#schemas-from-definition)
 - [Schema Stitching SDL](#schema-stitching-sdl)

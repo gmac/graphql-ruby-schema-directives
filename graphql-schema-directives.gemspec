@@ -1,8 +1,5 @@
 # frozen_string_literal: true
-
-lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
+$:.push File.expand_path('../lib', __FILE__)
 require 'graphql/schema-directives/version'
 
 Gem::Specification.new do |spec|
@@ -23,6 +20,7 @@ Gem::Specification.new do |spec|
   }
 
   spec.files = Dir['README.md', 'LICENSE', 'lib/**/*']
+  spec.require_paths = ['lib']
 
   spec.add_dependency 'graphql', '>= 1.9.8'
   spec.add_development_dependency 'bundler', '~> 2.0'

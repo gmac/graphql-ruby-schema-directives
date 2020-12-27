@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'graphql/schema-directives/version'
-require 'graphql/schema-directives/types'
+require 'graphql/schema_directives/version'
+require 'graphql/schema_directives/types'
 
 module GraphQL::SchemaDirectives
   def self.from_definition(*args, **kwargs, &block)

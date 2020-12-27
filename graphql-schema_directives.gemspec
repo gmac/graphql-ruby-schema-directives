@@ -1,9 +1,10 @@
-# -*- encoding: utf-8 -*-
-$:.push File.expand_path('../lib', __FILE__)
-require 'graphql/schema-directives/version'
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'graphql/schema_directives/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'graphql-schema-directives'
+  spec.name          = 'graphql-schema_directives'
   spec.version       = GraphQL::SchemaDirectives::VERSION
   spec.authors       = ['Greg MacWilliam']
   spec.summary       = 'Schema directives for graphql-ruby'
@@ -19,10 +20,12 @@ Gem::Specification.new do |spec|
     'bug_tracker_uri' => 'https://github.com/gmac/graphql-schema-directives-ruby/issues',
   }
 
-  spec.files = Dir['README.md', 'LICENSE', 'lib/**/*']
+  spec.files = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^test/})
+  end
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'graphql', '>= 1.9.8'
+  spec.add_dependency 'graphql', '~> 1.9'
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'rake', '~> 12.0'
   spec.add_development_dependency 'minitest', '~> 5.12'

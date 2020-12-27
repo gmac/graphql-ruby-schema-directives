@@ -8,6 +8,10 @@ Gem.path.each do |path|
   Warning.ignore(/.*splat keyword arguments.*/)
   Warning.ignore(/.*passed as a single Hash.*/)
   Warning.ignore(/.*instance variable @\w+ not initialized*/)
+  Warning.ignore(/.*previous definition of \w+ was here*/)
+  Warning.ignore(/.*statement not reached*/)
+  Warning.ignore(/.*method redefined; discarding old*/)
+  Warning.ignore(/.*possibly useless use of a constant in void context*/)
 end
 
 require 'bundler/setup'
@@ -15,7 +19,7 @@ Bundler.require(:default, :test)
 
 require 'minitest/pride'
 require 'minitest/autorun'
-require 'graphql-schema-directives'
+require 'graphql-schema_directives'
 
 def assert_not(val)
   assert !val

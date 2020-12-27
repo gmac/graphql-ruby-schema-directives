@@ -19,7 +19,7 @@ This gem is intentionally generic, versus the [apollo-federation](https://github
 Add to Gemfile:
 
 ```ruby
-gem 'graphql-schema-directives'
+gem 'graphql-schema_directives'
 ```
 
 Then install:

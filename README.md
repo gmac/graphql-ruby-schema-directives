@@ -11,7 +11,7 @@ This gem is intentionally generic, versus the [apollo-federation](https://github
 
 - [Installation](#installation)
 - [Class-based schemas](#class-based-schemas)
-- [Schemas from definition](#schemas-from-definition)
+- [Schema from type definitions](#schema-from-type-definitions)
 - [Schema Stitching SDL](#schema-stitching-sdl)
 
 ## Installation
@@ -185,7 +185,7 @@ class BaseScalar < GraphQL::Schema::Scalar
 end
 ```
 
-## Schemas from definition
+## Schema from type definitions
 
 You may also [parse and print SDLs](https://graphql-ruby.org/schema/sdl.html) using the gem's `from_definition` method:
 
@@ -224,7 +224,7 @@ puts schema.print_schema_with_directives
 
 Using `print_schema_with_directives` will include directives from the original AST as well as directives applied to added classes.
 
-### Schema Stitching
+### Schema Stitching SDL
 
 Following the [Schema Stitching SDL spec](https://www.graphql-tools.com/docs/stitch-directives-sdl) looks like this:
 

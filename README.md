@@ -1,13 +1,13 @@
 # Ruby GraphQL Schema Directives
 
-This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives that annotate an SDL. These annotations are useful for [Schema Stitching](https://www.graphql-tools.com/docs/stitch-directives-sdl), [Apollo Federation](https://www.apollographql.com/docs/federation/), and other proprietary uses.
+This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives used to annotate an SDL (for [Schema Stitching](https://www.graphql-tools.com/docs/stitch-directives-sdl), [Apollo Federation](https://www.apollographql.com/docs/federation/), or other proprietary uses).
 
 This gem is intentionally generic, versus the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem upon which it is based. The goals of this gem are much simpler:
 
-1. allow schema directives to be applied to any GraphQL element, and then printed into an annotated SDL.
+1. allow schema directives to be applied to any GraphQL element, and then printed as an annotated SDL.
 2. allow class-based schemas and parsed `GraphQL::Schema.from_definition` schemas to be combined and printed together.
 
-## Table of Contents
+## Contents
 
 - [Installation](#installation)
 - [Class-based schemas](#class-based-schemas)
@@ -30,11 +30,7 @@ bundle install
 
 ## Class-based schemas
 
-There's a typed mixin available for extending all GraphQL schema members.
-
-### Schema classes
-
-Include the schema mixin:
+There's a typed mixin available for extending all GraphQL schema members. The first thing to include is the schema mixin:
 
 ```ruby
 class MySchema < GraphQL::Schema
@@ -94,7 +90,7 @@ class XWing < BaseObject
 end
 ```
 
-Prints from `schema.print_schema_with_directives` as:
+Prints as:
 
 ```graphql
 interface Spaceship @attribute(speed: "average") {
@@ -227,3 +223,86 @@ puts schema.print_schema_with_directives
 ```
 
 Using `print_schema_with_directives` will include directives from the original AST as well as directives applied to added classes.
+
+### Schema Stitching
+
+Following the [Schema Stitching SDL spec](https://www.graphql-tools.com/docs/stitch-directives-sdl) looks like this:
+
+```ruby
+class BaseField < GraphQL::Schema::Field
+  include GraphQL::SchemaDirectives::Field
+end
+
+class BaseObject < GraphQL::Schema::Object
+  include GraphQL::SchemaDirectives::Object
+  field_class BaseField
+end
+
+class Product < BaseObject
+  add_directive :key, { selectionSet: '{ upc }' }
+
+  field :upc, ID, null: false
+  field :name, String, null: false
+  field :shipping_estimate, Int, null: true, directives: {
+    computed: { selectionSet: '{ price weight }' }
+  }
+end
+
+class Query < BaseObject
+  field :products, [Product], null: false, directives: {
+    merge: { keyField: 'upc' }
+  }
+end
+
+class MergeDirective < GraphQL::Schema::Directive
+  graphql_name 'merge'
+  add_argument GraphQL::Schema::Argument.new('keyField', String, required: false, owner: GraphQL::Schema)
+  add_argument GraphQL::Schema::Argument.new('keyArg', String, required: false, owner: GraphQL::Schema)
+  add_argument GraphQL::Schema::Argument.new('additionalArgs', String, required: false, owner: GraphQL::Schema)
+  add_argument GraphQL::Schema::Argument.new('key', [String], required: false, owner: GraphQL::Schema)
+  add_argument GraphQL::Schema::Argument.new('argsExpr', String, required: false, owner: GraphQL::Schema)
+  locations 'FIELD_DEFINITION'
+end
+
+class KeyDirective < GraphQL::Schema::Directive
+  graphql_name 'key'
+  add_argument GraphQL::Schema::Argument.new('selectionSet', String, required: true, owner: GraphQL::Schema)
+  locations 'OBJECT'
+end
+
+class ComputedDirective < GraphQL::Schema::Directive
+  graphql_name 'computed'
+  add_argument GraphQL::Schema::Argument.new('selectionSet', String, required: true, owner: GraphQL::Schema)
+  locations 'FIELD_DEFINITION'
+end
+
+class Subservice < GraphQL::Schema
+  include GraphQL::SchemaDirectives::Schema
+  directive(MergeDirective)
+  directive(KeyDirective)
+  directive(ComputedDirective)
+  query Query
+end
+
+Subservice.print_schema_with_directives
+```
+
+Which produces an annotated SDL for schema stitching:
+
+```graphql
+directive @computed(selectionSet: String!) on FIELD_DEFINITION
+
+directive @merge(additionalArgs: String, argsExpr: String, key: [String!], keyArg: String, keyField: String) on FIELD_DEFINITION
+
+directive @key(selectionSet: String!) on OBJECT
+
+type Product @key(selectionSet: "{ upc }") {
+  name: String!
+  shippingEstimate: Int @computed(selectionSet: "{ price weight }")
+  upc: ID!
+}
+
+type Query {
+  products: [Product!]! @merge(keyField: "upc")
+}
+```

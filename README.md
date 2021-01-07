@@ -1,18 +1,17 @@
 # Ruby GraphQL Schema Directives
 
-This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives used to annotate an SDL (for [Schema Stitching](https://www.graphql-tools.com/docs/stitch-directives-sdl), [Apollo Federation](https://www.apollographql.com/docs/federation/), or other proprietary uses).
+This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives that annotate an SDL for uses such as [Schema Stitching](https://github.com/gmac/schema-stitching-handbook/tree/master/subservice-languages/ruby). This is a more generic version of the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem (which is specifically tailored to setting up the [federation spec](https://www.apollographql.com/docs/federation/federation-spec/)).
 
-This gem is intentionally generic, versus the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem upon which it is based. The goals of this gem are much simpler:
+This gem has some very basic goals:
 
 1. allow schema directives to be applied to any GraphQL element, and then printed as an annotated SDL.
-2. allow class-based schemas and parsed `GraphQL::Schema.from_definition` schemas to be combined and printed together.
+2. allow class-based schemas and parsed `GraphQL::Schema.from_definition` schemas to be printed together.
 
 ## Contents
 
 - [Installation](#installation)
 - [Class-based schemas](#class-based-schemas)
 - [Schema from type definitions](#schema-from-type-definitions)
-- [Schema Stitching SDL](#schema-stitching-sdl)
 
 ## Installation
 
@@ -223,86 +222,3 @@ puts schema.print_schema_with_directives
 ```
 
 Using `print_schema_with_directives` will include directives from the original AST as well as directives applied to added classes.
-
-### Schema Stitching SDL
-
-Following the [Schema Stitching SDL spec](https://www.graphql-tools.com/docs/stitch-directives-sdl) looks like this:
-
-```ruby
-class BaseField < GraphQL::Schema::Field
-  include GraphQL::SchemaDirectives::Field
-end
-
-class BaseObject < GraphQL::Schema::Object
-  include GraphQL::SchemaDirectives::Object
-  field_class BaseField
-end
-
-class Product < BaseObject
-  add_directive :key, { selectionSet: '{ upc }' }
-
-  field :upc, ID, null: false
-  field :name, String, null: false
-  field :shipping_estimate, Int, null: true, directives: {
-    computed: { selectionSet: '{ price weight }' }
-  }
-end
-
-class Query < BaseObject
-  field :products, [Product], null: false, directives: {
-    merge: { keyField: 'upc' }
-  }
-end
-
-class MergeDirective < GraphQL::Schema::Directive
-  graphql_name 'merge'
-  add_argument GraphQL::Schema::Argument.new('keyField', String, required: false, owner: GraphQL::Schema)
-  add_argument GraphQL::Schema::Argument.new('keyArg', String, required: false, owner: GraphQL::Schema)
-  add_argument GraphQL::Schema::Argument.new('additionalArgs', String, required: false, owner: GraphQL::Schema)
-  add_argument GraphQL::Schema::Argument.new('key', [String], required: false, owner: GraphQL::Schema)
-  add_argument GraphQL::Schema::Argument.new('argsExpr', String, required: false, owner: GraphQL::Schema)
-  locations 'FIELD_DEFINITION'
-end
-
-class KeyDirective < GraphQL::Schema::Directive
-  graphql_name 'key'
-  add_argument GraphQL::Schema::Argument.new('selectionSet', String, required: true, owner: GraphQL::Schema)
-  locations 'OBJECT'
-end
-
-class ComputedDirective < GraphQL::Schema::Directive
-  graphql_name 'computed'
-  add_argument GraphQL::Schema::Argument.new('selectionSet', String, required: true, owner: GraphQL::Schema)
-  locations 'FIELD_DEFINITION'
-end
-
-class Subservice < GraphQL::Schema
-  include GraphQL::SchemaDirectives::Schema
-  directive(MergeDirective)
-  directive(KeyDirective)
-  directive(ComputedDirective)
-  query Query
-end
-
-Subservice.print_schema_with_directives
-```
-
-Which produces an annotated SDL for schema stitching:
-
-```graphql
-directive @computed(selectionSet: String!) on FIELD_DEFINITION
-
-directive @merge(additionalArgs: String, argsExpr: String, key: [String!], keyArg: String, keyField: String) on FIELD_DEFINITION
-
-directive @key(selectionSet: String!) on OBJECT
-
-type Product @key(selectionSet: "{ upc }") {
-  name: String!
-  shippingEstimate: Int @computed(selectionSet: "{ price weight }")
-  upc: ID!
-}
-
-type Query {
-  products: [Product!]! @merge(keyField: "upc")
-}
-```

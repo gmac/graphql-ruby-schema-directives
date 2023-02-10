@@ -1,4 +1,9 @@
-# Ruby GraphQL Schema Directives
+**This repository is no longer relevant**
+
+- 🚀 If you want schema directives, upgrade [`graphql-ruby`](https://github.com/rmosolgo/graphql-ruby) to v2.0.16.
+- 🧵 If you want schema stitching, use [`graphql-stitching-ruby`](https://github.com/gmac/graphql-stitching-ruby).
+
+## Ruby GraphQL Schema Directives
 
 This gem extends [GraphQL Ruby](http://graphql-ruby.org/) to add support for custom schema directives that annotate an SDL for uses such as [Schema Stitching](https://github.com/gmac/schema-stitching-handbook/tree/master/subservice-languages/ruby). This is a more generic version of the [apollo-federation](https://github.com/Gusto/apollo-federation-ruby) gem (which is specifically tailored to setting up the [federation spec](https://www.apollographql.com/docs/federation/federation-spec/)).
 
